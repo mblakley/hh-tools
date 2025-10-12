@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>RDYSL Callup Checker</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 600px; margin: 20px auto; padding: 20px; }
+        .form-group { margin: 15px 0; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        input { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+        button { background: #007cba; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; }
+        button:hover { background: #005a87; }
+        button:disabled { background: #ccc; cursor: not-allowed; }
+        .loading { text-align: center; margin: 20px 0; }
+        .error { background: #ffe6e6; border: 1px solid #ff9999; padding: 10px; border-radius: 4px; margin: 10px 0; }
+        .results { margin-top: 20px; }
+        .summary { background: #f0f8ff; padding: 15px; border-radius: 4px; margin: 10px 0; }
+        .summary h3 { margin-top: 0; }
+        .stats { display: flex; gap: 15px; margin: 10px 0; }
+        .stat { background: white; padding: 10px; border-radius: 4px; text-align: center; flex: 1; }
+        .stat.warning { background: #fff3cd; border: 1px solid #ffeaa7; }
+        .stat.danger { background: #f8d7da; border: 1px solid #f5c6cb; }
+        .stat.success { background: #d4edda; border: 1px solid #c3e6cb; }
+        .stat-number { font-size: 24px; font-weight: bold; }
+        .stat-label { font-size: 12px; color: #666; }
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        th, td { padding: 8px; text-align: left; border-bottom: 1px solid #ddd; }
+        th { background: #f5f5f5; font-weight: bold; }
+        .over-limit { background: #ffe6e6; }
+        .warning-row { background: #fff3cd; }
+        .status-ok { color: green; font-weight: bold; }
+        .status-warning { color: orange; font-weight: bold; }
+        .status-over { color: red; font-weight: bold; }
+        .hidden { display: none; }
+        .info { background: #e7f3ff; border: 1px solid #b3d9ff; padding: 10px; border-radius: 4px; margin: 10px 0; font-size: 14px; }
+    </style>
+</head>
+<body>
+    <h1>RDYSL Callup Analysis</h1>
+    <p>Check player callup compliance (4 callup limit per season)</p>
+    
+    <div class="info">
+        <strong>Instructions:</strong>
+        <ol>
+            <li>Login to <a href="https://www.rdysl.com/login" target="_blank">RDYSL website</a> in another tab</li>
+            <li>Navigate to <a href="https://www.rdysl.com/gamefines?F=club" target="_blank">Club Fees page</a></li>
+            <li>Copy the entire page content (View Source, Ctrl+A, Ctrl+C)</li>
+            <li>Paste it into the text area below and click "Analyze"</li>
+        </ol>
+        <p><strong>Note:</strong> This avoids CORS issues and respects RDYSL's terms of service.</p>
+    </div>
+    
+    <form id="dataForm">
+        <div class="form-group">
+            <label for="htmlData">Paste RDYSL Game Fines page HTML here:</label>
+            <textarea id="htmlData" rows="10" placeholder="Paste the HTML content from the RDYSL Game Fines page here..." style="
+                width: 100%;
+                padding: 8px;
+                border: 1px solid #ccc;
+                border-radius: 4px;
+                box-sizing: border-box;
+                font-family: monospace;
+                font-size: 12px;
+            "></textarea>
+        </div>
+        <div class="form-group">
+            <label for="playerSearch">Search for specific player (optional):</label>
+            <input type="text" id="playerSearch" placeholder="Enter player name to search..." style="
+                width: 100%;
+                padding: 8px;
+                border: 1px solid #ccc;
+                border-radius: 4px;
+                box-sizing: border-box;
+            ">
+        </div>
+        <button type="submit" id="submitBtn">Analyze Callups</button>
+    </form>
+
+    <div id="loading" class="loading hidden">
+        <p>Analyzing callup data...</p>
+    </div>
+
+    <div id="error" class="error hidden">
+        <p id="errorMsg"></p>
+    </div>
+
+    <div id="results" class="results hidden">
+        <div class="summary">
+            <h3>Summary</h3>
+            <div class="stats">
+                <div class="stat">
+                    <div class="stat-number" id="totalPlayers">0</div>
+                    <div class="stat-label">Total Players</div>
+                </div>
+                <div class="stat warning">
+                    <div class="stat-number" id="warnings">0</div>
+                    <div class="stat-label">Warnings (3)</div>
+                </div>
+                <div class="stat danger">
+                    <div class="stat-number" id="unavailable">0</div>
+                    <div class="stat-label">Unavailable (4)</div>
+                </div>
+                <div class="stat danger">
+                    <div class="stat-number" id="overLimit">0</div>
+                    <div class="stat-label">Over Limit (5+)</div>
+                </div>
+                <div class="stat success">
+                    <div class="stat-number" id="totalCallups">0</div>
+                    <div class="stat-label">Total Callups</div>
+                </div>
+            </div>
+        </div>
+
+        <h3>Player Details</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Player Name</th>
+                    <th>Callup Count</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody id="playerTable">
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        class RDYSLScraper {
+            constructor() {
+                // No external requests needed - user provides HTML directly
+            }
+
+            parseCallupData(html) {
+                const callupRecords = [];
+                
+                // Create a temporary DOM parser
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                
+                // Find all tables in the document
+                const tables = doc.querySelectorAll('table');
+                
+                tables.forEach(table => {
+                    const rows = table.querySelectorAll('tr');
+                    
+                    // Find header row to get column indices
+                    let typeColumnIndex = -1;
+                    let nameColumnIndex = -1;
+                    
+                    if (rows.length > 0) {
+                        const headerRow = rows[0];
+                        const headerCells = headerRow.querySelectorAll('th, td');
+                        headerCells.forEach((cell, index) => {
+                            const text = cell.textContent?.trim().toLowerCase();
+                            if (text?.includes('type')) {
+                                typeColumnIndex = index;
+                            }
+                            if (text?.includes('name')) {
+                                nameColumnIndex = index;
+                            }
+                        });
+                    }
+                    
+                    // If we found the required columns, process data rows
+                    if (typeColumnIndex !== -1 && nameColumnIndex !== -1) {
+                        for (let i = 1; i < rows.length; i++) {
+                            const row = rows[i];
+                            const cells = row.querySelectorAll('td, th');
+                            
+                            if (cells.length > Math.max(typeColumnIndex, nameColumnIndex)) {
+                                const typeCell = cells[typeColumnIndex];
+                                const nameCell = cells[nameColumnIndex];
+                                
+                                if (typeCell && nameCell) {
+                                    const typeText = typeCell.textContent?.trim() || '';
+                                    const nameText = nameCell.textContent?.trim() || '';
+                                    
+                                    // Check if this is a callup record
+                                    if (typeText.toLowerCase().startsWith('callup:')) {
+                                        callupRecords.push({
+                                            name: nameText,
+                                            type: typeText,
+                                            count: 1
+                                        });
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+                
+                return callupRecords;
+            }
+
+            generateCallupSummary(callupRecords) {
+                const playerCounts = new Map();
+                
+                // Count callups per player
+                callupRecords.forEach(record => {
+                    const currentCount = playerCounts.get(record.name) || 0;
+                    playerCounts.set(record.name, currentCount + 1);
+                });
+                
+                // Generate summary
+                const summary = [];
+                playerCounts.forEach((count, playerName) => {
+                    let status = 'OK';
+                    let isWarning = false;
+                    let isUnavailable = false;
+                    let isOverLimit = false;
+                    
+                    if (count > 4) {
+                        status = 'OVER LIMIT';
+                        isOverLimit = true;
+                    } else if (count === 4) {
+                        status = 'UNAVAILABLE';
+                        isUnavailable = true;
+                    } else if (count === 3) {
+                        status = 'WARNING';
+                        isWarning = true;
+                    }
+                    
+                    summary.push({
+                        playerName,
+                        callupCount: count,
+                        status,
+                        isWarning,
+                        isUnavailable,
+                        isOverLimit
+                    });
+                });
+                
+                // Sort by callup count (descending)
+                return summary.sort((a, b) => b.callupCount - a.callupCount);
+            }
+
+            getCallupAnalysis(htmlData) {
+                try {
+                    if (!htmlData || htmlData.trim().length === 0) {
+                        throw new Error('Please paste the HTML content from the RDYSL Game Fines page');
+                    }
+
+                    // Check if we got a login page instead of data
+                    if (htmlData.includes('Login corrupted') || htmlData.includes('You must login again')) {
+                        throw new Error('The pasted content appears to be a login page. Please make sure you are logged in and copy the actual Game Fines page content.');
+                    }
+
+                    // Parse callup records
+                    const callupRecords = this.parseCallupData(htmlData);
+                    
+                    if (callupRecords.length === 0) {
+                        throw new Error('No callup records found in the pasted content. Please make sure you copied the correct page content.');
+                    }
+                    
+                    // Generate summary
+                    const summary = this.generateCallupSummary(callupRecords);
+                    
+                    return {
+                        success: true,
+                        summary,
+                        totalRecords: callupRecords.length
+                    };
+                } catch (error) {
+                    console.error('Callup analysis failed:', error);
+                    return {
+                        success: false,
+                        error: error.message || 'Unknown error occurred'
+                    };
+                }
+            }
+        }
+
+        // Initialize scraper
+        const scraper = new RDYSLScraper();
+
+        // Handle form submission
+        document.getElementById('dataForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const htmlData = document.getElementById('htmlData').value;
+            const playerSearch = document.getElementById('playerSearch').value.trim();
+            
+            showLoading();
+            
+            try {
+                const result = scraper.getCallupAnalysis(htmlData);
+                
+                if (result.success) {
+                    showResults(result, playerSearch);
+                } else {
+                    showError(result.error || 'Failed to analyze callup data');
+                }
+            } catch (error) {
+                showError('Analysis error. Please try again.');
+            } finally {
+                hideLoading();
+            }
+        });
+
+        function showLoading() {
+            hideAll();
+            document.getElementById('loading').classList.remove('hidden');
+            document.getElementById('submitBtn').disabled = true;
+            document.getElementById('submitBtn').textContent = 'Analyzing...';
+        }
+
+        function hideLoading() {
+            document.getElementById('loading').classList.add('hidden');
+            document.getElementById('submitBtn').disabled = false;
+            document.getElementById('submitBtn').textContent = 'Analyze Callups';
+        }
+
+        function showError(message) {
+            hideAll();
+            document.getElementById('errorMsg').textContent = message;
+            document.getElementById('error').classList.remove('hidden');
+        }
+
+        function showResults(data, playerSearch = '') {
+            hideAll();
+            
+            if (!data.summary) return;
+
+            let filteredSummary = data.summary;
+            let searchMessage = '';
+
+            // Filter by player name if search term provided
+            let foundPlayer = null;
+            if (playerSearch) {
+                const searchTerm = playerSearch.toLowerCase();
+                foundPlayer = data.summary.find(player => 
+                    player.playerName.toLowerCase().includes(searchTerm)
+                );
+                
+                if (foundPlayer) {
+                    searchMessage = `${foundPlayer.playerName} - ${foundPlayer.status} (${foundPlayer.callupCount} callups)`;
+                } else {
+                    searchMessage = `No callups found for player "${playerSearch}".`;
+                }
+            }
+
+            // Calculate stats (always use full summary for stats)
+            const totalPlayers = data.summary.length;
+            const warnings = data.summary.filter(p => p.isWarning).length;
+            const unavailable = data.summary.filter(p => p.isUnavailable).length;
+            const overLimit = data.summary.filter(p => p.isOverLimit).length;
+            const totalCallups = data.summary.reduce((sum, p) => sum + p.callupCount, 0);
+
+            // Update summary
+            document.getElementById('totalPlayers').textContent = totalPlayers;
+            document.getElementById('warnings').textContent = warnings;
+            document.getElementById('unavailable').textContent = unavailable;
+            document.getElementById('overLimit').textContent = overLimit;
+            document.getElementById('totalCallups').textContent = totalCallups;
+
+            // Show search message if applicable
+            const resultsDiv = document.getElementById('results');
+            if (searchMessage) {
+                const messageDiv = document.createElement('div');
+                messageDiv.className = 'info';
+                
+                // Color the search result box based on player status
+                if (foundPlayer) {
+                    if (foundPlayer.isOverLimit || foundPlayer.isUnavailable) {
+                        messageDiv.style.background = '#ffe6e6';
+                        messageDiv.style.borderColor = '#ff9999';
+                    } else if (foundPlayer.isWarning) {
+                        messageDiv.style.background = '#fff3cd';
+                        messageDiv.style.borderColor = '#ffeaa7';
+                    } else {
+                        messageDiv.style.background = '#f0f8ff';
+                        messageDiv.style.borderColor = '#b3d9ff';
+                    }
+                }
+                
+                messageDiv.innerHTML = `<strong>Search Result:</strong> ${searchMessage}`;
+                resultsDiv.insertBefore(messageDiv, resultsDiv.firstChild);
+            }
+
+            // Update table (always show full summary)
+            const tableBody = document.getElementById('playerTable');
+            tableBody.innerHTML = data.summary.map(player => {
+                let rowClass = '';
+                let statusClass = 'status-ok';
+                let statusText = 'OK';
+                
+                if (player.isOverLimit) {
+                    rowClass = 'over-limit';
+                    statusClass = 'status-over';
+                    statusText = 'OVER LIMIT';
+                } else if (player.isUnavailable) {
+                    rowClass = 'over-limit';
+                    statusClass = 'status-over';
+                    statusText = 'UNAVAILABLE';
+                } else if (player.isWarning) {
+                    rowClass = 'warning-row';
+                    statusClass = 'status-warning';
+                    statusText = 'WARNING';
+                }
+                
+                return `
+                    <tr class="${rowClass}">
+                        <td>${player.playerName}</td>
+                        <td>${player.callupCount}</td>
+                        <td class="${statusClass}">
+                            ${statusText}
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+
+            document.getElementById('results').classList.remove('hidden');
+        }
+
+        function hideAll() {
+            document.getElementById('loading').classList.add('hidden');
+            document.getElementById('error').classList.add('hidden');
+            document.getElementById('results').classList.add('hidden');
+        }
+    </script>
+</body>
+</html>

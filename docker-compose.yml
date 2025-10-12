@@ -1,0 +1,35 @@
+services:
+  rdysl-callup-api:
+    build: .
+    container_name: rdysl-callup-api
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - RDYSL_USERNAME=${RDYSL_USERNAME}
+      - RDYSL_PASSWORD=${RDYSL_PASSWORD}
+      - PORT=3000
+      - SESSION_SECRET=${SESSION_SECRET:-your_session_secret_here}
+      - RATE_LIMIT_WINDOW_MS=900000
+      - RATE_LIMIT_MAX_REQUESTS=100
+      - CACHE_DURATION_MINUTES=30
+      - ALLOWED_ORIGINS=${ALLOWED_ORIGINS:-*}
+    volumes:
+      # Optional: Mount logs directory for persistent logging
+      - ./logs:/app/logs
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    # Resource limits
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+          cpus: '0.5'
+        reservations:
+          memory: 512M
+          cpus: '0.25'

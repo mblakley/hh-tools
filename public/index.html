@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>RDYSL Callup Checker</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            max-width: 800px; 
+            margin: 20px auto; 
+            padding: 20px; 
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .form-group { margin: 15px 0; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            box-sizing: border-box;
+            font-size: 16px;
+        }
+        .button-row {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin: 15px 0;
+        }
+        .checkbox-label {
+            display: flex !important;
+            align-items: center;
+            margin-bottom: 0;
+            font-weight: normal;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+        .checkbox-label input[type="checkbox"] {
+            margin-right: 8px;
+            transform: scale(1.1);
+        }
+        button {
+            background: #007cba;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover { background: #005a87; }
+        button:disabled { background: #ccc; cursor: not-allowed; }
+        .loading { text-align: center; margin: 20px 0; }
+        .error { 
+            background: #ffe6e6; 
+            border: 1px solid #ff9999; 
+            padding: 15px; 
+            border-radius: 6px; 
+            margin: 15px 0; 
+        }
+        .success {
+            background: #e6ffe6;
+            border: 1px solid #99ff99;
+            padding: 15px;
+            border-radius: 6px;
+            margin: 15px 0;
+        }
+        .results { margin-top: 20px; }
+        .summary { 
+            background: #f0f8ff; 
+            padding: 20px; 
+            border-radius: 6px; 
+            margin: 15px 0; 
+        }
+        .summary h3 { margin-top: 0; }
+        .stats { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); 
+            gap: 15px; 
+            margin: 15px 0; 
+        }
+        .stat { 
+            background: white; 
+            padding: 15px; 
+            border-radius: 6px; 
+            text-align: center; 
+            border: 2px solid #e0e0e0;
+        }
+        .stat.warning { 
+            background: #fff3cd; 
+            border-color: #ffeaa7; 
+        }
+        .stat.danger { 
+            background: #f8d7da; 
+            border-color: #f5c6cb; 
+        }
+        .stat.success { 
+            background: #d4edda; 
+            border-color: #c3e6cb; 
+        }
+        .stat-number { 
+            font-size: 28px; 
+            font-weight: bold; 
+            margin-bottom: 5px;
+        }
+        .stat-label { 
+            font-size: 14px; 
+            color: #666; 
+        }
+        table { 
+            width: 100%; 
+            border-collapse: collapse; 
+            margin-top: 20px; 
+            background: white;
+        }
+        th, td { 
+            padding: 12px; 
+            text-align: left; 
+            border-bottom: 1px solid #ddd; 
+        }
+        th { 
+            background: #f8f9fa; 
+            font-weight: bold; 
+        }
+        .over-limit { background: #ffe6e6; }
+        .warning-row { background: #fff3cd; }
+        .status-ok { color: #28a745; font-weight: bold; }
+        .status-warning { color: #ffc107; font-weight: bold; }
+        .status-over { color: #dc3545; font-weight: bold; }
+        .hidden { display: none; }
+        .info { 
+            background: #e7f3ff; 
+            border: 1px solid #b3d9ff; 
+            padding: 15px; 
+            border-radius: 6px; 
+            margin: 15px 0; 
+            font-size: 14px; 
+        }
+        .last-updated {
+            font-size: 12px;
+            color: #666;
+            text-align: center;
+            margin-top: 10px;
+        }
+        .refresh-btn {
+            background: #28a745;
+            font-size: 14px;
+            padding: 8px 16px;
+        }
+        .refresh-btn:hover {
+            background: #218838;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>RDYSL Callup Analysis</h1>
+        <p>Check player callup compliance (4 callup limit per season)</p>
+        
+        <div class="info">
+            <strong>Instructions:</strong>
+            <ol>
+                <li>Check "Force Refresh" if you want to fetch fresh data from RDYSL (bypasses cache)</li>
+                <li>Optionally search for a specific player using the search box</li>
+                <li>Click "Get Callup Data" to fetch the information</li>
+            </ol>
+            <p><strong>Note:</strong> This tool securely accesses RDYSL data and presents it in a user-friendly format.</p>
+        </div>
+        
+        <div class="form-group">
+            <label for="playerSearch">Search for specific player (optional):</label>
+            <input type="text" id="playerSearch" placeholder="Enter player name to search..." />
+        </div>
+
+        <div class="form-group button-row">
+            <button type="button" id="getDataBtn">Get Callup Data</button>
+            <label for="forceRefresh" class="checkbox-label">
+                <input type="checkbox" id="forceRefresh" />
+                Force Refresh
+            </label>
+        </div>
+
+        <div id="loading" class="loading hidden">
+            <p>Fetching callup data from RDYSL...</p>
+        </div>
+
+        <div id="error" class="error hidden">
+            <p id="errorMsg"></p>
+        </div>
+
+        <div id="success" class="success hidden">
+            <p id="successMsg"></p>
+        </div>
+
+        <div id="results" class="results hidden">
+            <div class="summary">
+                <h3>Summary</h3>
+                <div class="stats">
+                    <div class="stat">
+                        <div class="stat-number" id="totalPlayers">0</div>
+                        <div class="stat-label">Total Players</div>
+                    </div>
+                    <div class="stat warning">
+                        <div class="stat-number" id="warnings">0</div>
+                        <div class="stat-label">Warnings (3)</div>
+                    </div>
+                    <div class="stat danger">
+                        <div class="stat-number" id="unavailable">0</div>
+                        <div class="stat-label">Unavailable (4)</div>
+                    </div>
+                    <div class="stat danger">
+                        <div class="stat-number" id="overLimit">0</div>
+                        <div class="stat-label">Over Limit (5+)</div>
+                    </div>
+                    <div class="stat success">
+                        <div class="stat-number" id="totalCallups">0</div>
+                        <div class="stat-label">Total Callups</div>
+                    </div>
+                </div>
+            </div>
+
+            <h3>Player Details</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Player Name</th>
+                        <th>Callup Count</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody id="playerTable">
+                </tbody>
+            </table>
+            
+            <div class="last-updated" id="lastUpdated"></div>
+        </div>
+    </div>
+
+    <script src="/js/app.js"></script>
+</body>
+</html>
