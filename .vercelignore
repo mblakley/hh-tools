@@ -1,0 +1,60 @@
+# Dependencies
+node_modules/
+package-lock.json
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# Database files
+*.db
+*.db-journal
+data/
+
+# Docker files
+Dockerfile
+Dockerfile.dev
+docker-compose.yml
+docker-compose.dev.yml
+.dockerignore
+
+# Build artifacts
+exports/
+uploads/
+
+# Testing
+tests/
+playwright.config.js
+.playwright/
+
+# Documentation (optional - remove these lines if you want docs deployed)
+docs/
+*.md
+!README.md
+
+# Source code (not needed for static callup checker)
+src/
+server.js
+nodemon.json
+
+# IDE and system files
+.vscode/
+.idea/
+.DS_Store
+*.log
+
+# Claude files
+.claude/
+.claudeignore
+.mcp.json
+
+# Git
+.git/
+.gitignore
+
+# Excel and data files (optional - keep if needed)
+*.xlsx
+
+# Scripts
+scripts/

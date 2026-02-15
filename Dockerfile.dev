@@ -1,4 +1,4 @@
-# Use Node.js 20 LTS as base image for better compatibility
+# Development Dockerfile for hot reloading
 FROM node:20-alpine
 
 # Install necessary packages for Puppeteer
@@ -23,27 +23,31 @@ WORKDIR /app
 # Copy package files
 COPY package*.json ./
 
-# Install dependencies
-RUN npm install --omit=dev && npm cache clean --force
+# Install dependencies (including dev dependencies for nodemon)
+RUN npm install
 
 # Copy source code
 COPY . .
 
-# Create non-root user for security
+# Create necessary directories
+RUN mkdir -p uploads logs exports
+
+# Create non-root user for security (but allow root for development)
 RUN addgroup -g 1001 -S nodejs && \
     adduser -S nodejs -u 1001
 
-# Create necessary directories and set ownership
-RUN mkdir -p uploads logs && \
-    chown -R nodejs:nodejs /app
-USER nodejs
+# Change ownership of necessary directories
+RUN chown -R nodejs:nodejs /app/uploads /app/logs /app/exports
+
+# Switch to nodejs user for security, but allow root for development file watching
+USER root
 
 # Expose port
 EXPOSE 3000
 
-# Health check
+# Health check for development
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
     CMD node -e "require('http').get('http://localhost:3000/api/health', (res) => { process.exit(res.statusCode === 200 ? 0 : 1) })"
 
-# Start the application
-CMD ["node", "src/server.js"]
+# Start in development mode with file watching
+CMD ["npm", "run", "dev:docker"]

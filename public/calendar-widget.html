@@ -1,0 +1,372 @@
+<!-- Hilton Heat Calendar Widget - Self-Contained HTML Element -->
+<!-- Copy this entire block into your existing HTML page -->
+<div id="hilton-heat-calendar-widget">
+    <style>
+        #hilton-heat-calendar-widget {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 20px;
+        }
+        
+        /* Mobile responsive styles */
+        @media (max-width: 768px) {
+            #hilton-heat-calendar-widget {
+                padding: 10px;
+                margin: 0;
+                border-radius: 0;
+                box-shadow: none;
+            }
+            
+            #hilton-heat-calendar-widget .loading-spinner {
+                padding: 15px;
+                font-size: 14px;
+            }
+            
+            #hilton-heat-calendar-widget .spinner {
+                width: 30px;
+                height: 30px;
+                border-width: 3px;
+            }
+            
+            #group-legend {
+                display: grid !important;
+                grid-template-columns: repeat(2, 1fr) !important;
+                gap: 8px !important;
+            }
+            
+            #group-legend > div {
+                padding: 8px !important;
+                font-size: 12px !important;
+            }
+            
+            #group-legend strong {
+                font-size: 12px !important;
+            }
+            
+            #group-legend div {
+                font-size: 10px !important;
+                line-height: 1.2 !important;
+            }
+        }
+        
+        /* Extra small mobile screens */
+        @media (max-width: 480px) {
+            #hilton-heat-calendar-widget {
+                padding: 5px;
+            }
+            
+            #group-legend {
+                grid-template-columns: 1fr !important;
+                gap: 6px !important;
+            }
+            
+            #group-legend > div {
+                padding: 6px !important;
+            }
+            
+            #hilton-heat-calendar-widget .loading-spinner {
+                padding: 10px;
+                font-size: 12px;
+            }
+        }
+        #hilton-heat-calendar-widget #calendar {
+            margin-top: 0;
+        }
+        #hilton-heat-calendar-widget .loading-spinner {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            color: #666;
+            font-size: 16px;
+            font-weight: 500;
+        }
+        #hilton-heat-calendar-widget .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 10px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .group-a { border-left-color: #ffb366 !important; }
+        .group-b { border-left-color: #66b3ff !important; }
+        .group-c { border-left-color: #cc99ff !important; }
+        .group-d { border-left-color: #99ff99 !important; }
+        .group-e { border-left-color: #ff99cc !important; }
+        .group-f { border-left-color: #bed6a1 !important; }
+    </style>
+
+    <div id="loading" class="loading-spinner">
+        <div class="spinner"></div>
+        <span>Loading schedules...</span>
+    </div>
+    
+    <div id="calendar"></div>
+    
+    <div id="legend" style="margin-top: 20px; padding: 15px; background-color: #f8f9fa; border-radius: 8px; border: 1px solid #e9ecef;">
+        <h3 style="margin: 0 0 15px 0; color: #333; font-size: 18px;">Team Groups</h3>
+        <div id="group-legend" style="display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px;">
+            <div class="group-a" style="background: white; padding: 12px; border-radius: 6px; border-left: 4px solid #ffb366;">
+                <strong style="color: #2c3e50; font-size: 14px;">Group A</strong>
+                <div style="color: #666; font-size: 12px; margin-top: 4px; line-height: 1.4;">
+                    <div>Bu12- Borcyk</div>
+                    <div>Bu11- Miner</div>
+                    <div>Gu12- Colavecchia</div>
+                    <div>Bu12- Sotile</div>
+                </div>
+            </div>
+            <div class="group-b" style="background: white; padding: 12px; border-radius: 6px; border-left: 4px solid #66b3ff;">
+                <strong style="color: #2c3e50; font-size: 14px;">Group B</strong>
+                <div style="color: #666; font-size: 12px; margin-top: 4px; line-height: 1.4;">
+                    <div>Gu9- Diedrich</div>
+                    <div>Gu10- Vargas</div>
+                    <div>Gu10- Bellavia</div>
+                    <div>Gu11- Stagnitta</div>
+                    <div>Grassroots</div>
+                </div>
+            </div>
+            <div class="group-c" style="background: white; padding: 12px; border-radius: 6px; border-left: 4px solid #cc99ff;">
+                <strong style="color: #2c3e50; font-size: 14px;">Group C</strong>
+                <div style="color: #666; font-size: 12px; margin-top: 4px; line-height: 1.4;">
+                    <div>Gu8- Vargas</div>
+                    <div>Bu11- Meyer</div>
+                    <div>Bu10- Wallenhorst</div>
+                    <div>Bu8- Tette</div>
+                    <div>Gu9- D'Alonzo</div>
+                </div>
+            </div>
+            <div class="group-d" style="background: white; padding: 12px; border-radius: 6px; border-left: 4px solid #99ff99;">
+                <strong style="color: #2c3e50; font-size: 14px;">Group D</strong>
+                <div style="color: #666; font-size: 12px; margin-top: 4px; line-height: 1.4;">
+                    <div>Gu15- Pollock</div>
+                    <div>Gu12- Zecher</div>
+                    <div>Gu11- Bowling</div>
+                    <div>Gu13- Montagliano</div>
+                </div>
+            </div>
+            <div class="group-e" style="background: white; padding: 12px; border-radius: 6px; border-left: 4px solid #ff99cc;">
+                <strong style="color: #2c3e50; font-size: 14px;">Group E</strong>
+                <div style="color: #666; font-size: 12px; margin-top: 4px; line-height: 1.4;">
+                    <div>Bu13- Garcia</div>
+                    <div>Bu13- Pollock</div>
+                    <div>Bu14- Guzzetta</div>
+                    <div>Bu16- Fromm</div>
+                </div>
+            </div>
+            <div class="group-f" style="background: white; padding: 12px; border-radius: 6px; border-left: 4px solid #bed6a1;">
+                <strong style="color: #2c3e50; font-size: 14px;">Group F</strong>
+                <div style="color: #666; font-size: 12px; margin-top: 4px; line-height: 1.4;">
+                    <div>Bu15- Flaitz</div>
+                    <div>Bu15- D'Ambrosio</div>
+                    <div>Gu14- DiMartino/DiGiacco</div>
+                    <div>Gu16- Niedzwiecki</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js"></script>
+    <script>
+        (function() {
+            // ICS Calendar URLs from TeamSnap
+            const calendarUrls = [
+                'http://ical-cdn.teamsnap.com/team_schedule/b2096e06-e20f-4f4f-966b-967ac79af6d2.ics', // All Teams
+                'http://ical-cdn.teamsnap.com/team_schedule/a724cc32-b034-4e03-82f0-82f629070766.ics', // BU8-U11
+                'http://ical-cdn.teamsnap.com/team_schedule/821c820e-d1d2-40bf-ba5a-a59d5868bfe4.ics', // GU8-U11
+                'http://ical-cdn.teamsnap.com/team_schedule/fe26fd70-41ea-4ada-882e-395c4977aaed.ics', // Group A
+                'http://ical-cdn.teamsnap.com/team_schedule/b0c5df38-a03c-4179-9c24-521598a08f33.ics', // Group B
+                'http://ical-cdn.teamsnap.com/team_schedule/8701149b-8ccf-4c7b-b392-19e6b3540918.ics', // Group C
+                'http://ical-cdn.teamsnap.com/team_schedule/8e017eab-a8f6-43a2-b454-f66331d0c5b6.ics', // Group D
+                'http://ical-cdn.teamsnap.com/team_schedule/f022318b-d44f-4222-ac27-3ba922eee507.ics', // Group E
+                'http://ical-cdn.teamsnap.com/team_schedule/6c09f5c2-a47f-475e-b194-3ebc79d235ad.ics'  // Group F
+            ];
+
+            let allEvents = [];
+            let loadedCalendars = 0;
+            let totalCalendars = calendarUrls.length;
+
+            // Initialize calendar when DOM is ready
+            function initializeCalendar() {
+                const calendarEl = document.getElementById('calendar');
+                if (!calendarEl) return;
+
+                const calendar = new FullCalendar.Calendar(calendarEl, {
+                    initialView: 'dayGridMonth',
+                    headerToolbar: {
+                        left: 'prev,next today',
+                        center: 'title',
+                        right: 'dayGridMonth,timeGridWeek,listWeek'
+                    },
+                    events: [],
+                    eventClick: function(info) {
+                        alert('Event: ' + info.event.title + '\nStart: ' + info.event.start.toLocaleString());
+                    },
+                    dayMaxEvents: false,
+                    moreLinkClick: 'popover',
+                    dayCellContent: function(info) {
+                        return { html: '<div style="font-size: 12px; padding: 2px;">' + info.dayNumberText + '</div>' };
+                    },
+                    hiddenDays: [1, 2, 3, 5, 6] // Hide Mon, Tue, Wed, Fri, Sat - only show Sun, Thu
+                });
+                calendar.render();
+
+                // Load all calendars
+                loadAllCalendars(calendar);
+            }
+
+            async function loadAllCalendars(calendar) {
+                for (let i = 0; i < calendarUrls.length; i++) {
+                    await loadCalendar(calendarUrls[i], i + 1, calendar);
+                }
+
+                // Update calendar with all events
+                calendar.removeAllEvents();
+                calendar.addEventSource(allEvents);
+                
+                // Hide loading message
+                const loadingEl = document.getElementById('loading');
+                if (loadingEl) loadingEl.style.display = 'none';
+            }
+
+            async function loadCalendar(url, calendarIndex, calendar) {
+                // Add small delay to avoid rate limiting
+                await new Promise(resolve => setTimeout(resolve, calendarIndex * 200));
+                
+                // Try a different CORS proxy
+                const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(url)}`;
+                
+                try {
+                    const response = await fetch(proxyUrl, {
+                        method: 'GET',
+                        headers: {
+                            'Accept': 'text/calendar,text/plain,*/*'
+                        }
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                    }
+
+                    const icsContent = await response.text();
+                    
+                    const events = parseICS(icsContent, calendarIndex);
+                    allEvents = allEvents.concat(events);
+                    loadedCalendars++;
+                    
+                } catch (error) {
+                    // Calendar failed to load - continue with others
+                }
+            }
+
+            function parseICS(icsContent, calendarIndex) {
+                const events = [];
+                const lines = icsContent.split('\n');
+                
+                let currentEvent = null;
+                let eventCount = 0;
+                
+                for (let i = 0; i < lines.length; i++) {
+                    const line = lines[i].trim();
+                    
+                    if (line === 'BEGIN:VEVENT') {
+                        currentEvent = {};
+                        eventCount++;
+                    } else if (line === 'END:VEVENT' && currentEvent) {
+                        if (currentEvent.summary) {
+                            // Determine group color based on event title
+                            let color = '#3498db'; // default blue
+                            if (currentEvent.summary.includes('All Teams')) color = '#4a90e2'; // darker blue (GRSP Closed)
+                            else if (currentEvent.summary.includes('BU8-U11')) color = '#87ceeb'; // light blue (Foot Skills Boys)
+                            else if (currentEvent.summary.includes('GU8-U11')) color = '#ffb6c1'; // light pink/salmon (Foot Skills Girls)
+                            else if (currentEvent.summary.includes('Group A')) color = '#ffb366'; // Orange/peach
+                            else if (currentEvent.summary.includes('Group B')) color = '#66b3ff'; // Blue
+                            else if (currentEvent.summary.includes('Group C')) color = '#cc99ff'; // Purple
+                            else if (currentEvent.summary.includes('Group D')) color = '#99ff99'; // Green
+                            else if (currentEvent.summary.includes('Group E')) color = '#ff99cc'; // Pink
+                            else if (currentEvent.summary.includes('Group F')) color = '#bed6a1'; // Sage green
+                            
+                            const event = {
+                                title: currentEvent.summary,
+                                start: currentEvent.dtstart,
+                                end: currentEvent.dtend,
+                                allDay: false,
+                                color: color
+                            };
+                            
+                            // Only add events with valid dates
+                            if (event.start && event.start.toString() !== 'Invalid Date') {
+                                events.push(event);
+                            }
+                        }
+                        currentEvent = null;
+                    } else if (currentEvent && line.startsWith('DTSTART')) {
+                        const dateStr = line.substring(line.indexOf(':') + 1);
+                        currentEvent.dtstart = parseICSDate(dateStr);
+                    } else if (currentEvent && line.startsWith('DTEND')) {
+                        const dateStr = line.substring(line.indexOf(':') + 1);
+                        currentEvent.dtend = parseICSDate(dateStr);
+                    } else if (currentEvent && line.startsWith('SUMMARY:')) {
+                        currentEvent.summary = line.substring(8);
+                    }
+                }
+                
+                return events;
+            }
+
+            function parseICSDate(dateStr) {
+                try {
+                    // Handle different ICS date formats
+                    if (dateStr.includes('T')) {
+                        // Format: 20251023T170000 or 20251023T170000Z
+                        const cleanDate = dateStr.replace('Z', '');
+                        if (cleanDate.length === 15) {
+                            // YYYYMMDDTHHMMSS format
+                            const year = cleanDate.substring(0, 4);
+                            const month = cleanDate.substring(4, 6);
+                            const day = cleanDate.substring(6, 8);
+                            const hour = cleanDate.substring(9, 11);
+                            const minute = cleanDate.substring(11, 13);
+                            const second = cleanDate.substring(13, 15);
+                            
+                            return new Date(year, month - 1, day, hour, minute, second);
+                        }
+                    } else if (dateStr.length === 8) {
+                        // Format: 20251023 (date only)
+                        const year = dateStr.substring(0, 4);
+                        const month = dateStr.substring(4, 6);
+                        const day = dateStr.substring(6, 8);
+                        
+                        return new Date(year, month - 1, day);
+                    }
+                    
+                    // Fallback to standard Date parsing
+                    return new Date(dateStr);
+                } catch (error) {
+                    return null;
+                }
+            }
+
+
+            // Initialize when DOM is ready
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', initializeCalendar);
+            } else {
+                initializeCalendar();
+            }
+        })();
+    </script>
+</div>

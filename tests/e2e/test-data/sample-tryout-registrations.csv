@@ -1,0 +1,17 @@
+first_name,last_name,email,phone,date_of_birth,parent_name,parent_email,age_group,season
+John,Smith,john.smith@example.com,555-0101,2010-03-15,Robert Smith,robert.smith@example.com,U12,Fall 2024
+Emily,Johnson,emily.johnson@example.com,555-0102,2011-07-22,Sarah Johnson,sarah.johnson@example.com,U11,Fall 2024
+Michael,Williams,michael.williams@example.com,555-0103,2009-11-08,David Williams,david.williams@example.com,U13,Fall 2024
+Sarah,Brown,sarah.brown@example.com,555-0104,2012-01-30,Jennifer Brown,jennifer.brown@example.com,U10,Fall 2024
+Daniel,Jones,daniel.jones@example.com,555-0105,2010-05-17,Mark Jones,mark.jones@example.com,U12,Fall 2024
+Emma,Garcia,emma.garcia@example.com,555-0106,2011-09-03,Maria Garcia,maria.garcia@example.com,U11,Fall 2024
+James,Martinez,james.martinez@example.com,555-0107,2009-12-25,Carlos Martinez,carlos.martinez@example.com,U13,Fall 2024
+Olivia,Rodriguez,olivia.rodriguez@example.com,555-0108,2012-04-11,Ana Rodriguez,ana.rodriguez@example.com,U10,Fall 2024
+William,Davis,william.davis@example.com,555-0109,2010-08-19,Thomas Davis,thomas.davis@example.com,U12,Fall 2024
+Sophia,Miller,sophia.miller@example.com,555-0110,2011-02-27,Lisa Miller,lisa.miller@example.com,U11,Fall 2024
+
+
+
+
+
+

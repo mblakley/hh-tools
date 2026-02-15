@@ -1,0 +1,80 @@
+# Dependencies
+node_modules/
+package-lock.json
+
+# Build outputs
+dist/
+build/
+
+# Database files
+*.db
+*.db-journal
+*.sqlite
+*.sqlite3
+
+# Test outputs and reports
+test-results/
+playwright-report/
+coverage/
+.playwright/
+
+# Exports and generated data
+exports/
+*.csv
+
+# Environment and secrets
+.env
+.env.*
+!.env.example
+.dockerignore
+
+# Logs
+*.log
+npm-debug.log*
+logs/
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE/Editor files
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Media files (can be large)
+media/
+*.mp4
+*.avi
+*.mov
+*.mkv
+*.mp3
+*.wav
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# Python cache (for sync-audio-video.py scripts)
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# TeamSnap response dumps (debugging artifacts)
+teams_response.json
+
+# Large documentation images/assets
+public/**/*.png
+public/**/*.jpg
+public/**/*.jpeg
+public/**/*.gif
+
+# Backup files
+*.bak
+*.backup

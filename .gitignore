@@ -91,3 +91,9 @@ Thumbs.db
 tmp/
 temp/
 
+# Project-specific
+.env.docker
+.mcp.json
+data/
+
+*.xlsx

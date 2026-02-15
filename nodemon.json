@@ -1,0 +1,28 @@
+{
+  "watch": [
+    "src",
+    "public"
+  ],
+  "ext": "js,json,html",
+  "ignore": [
+    "node_modules",
+    "logs",
+    "uploads",
+    "exports",
+    "test-results",
+    "playwright-report"
+  ],
+  "exec": "node src/server.js",
+  "env": {
+    "NODE_ENV": "development"
+  },
+  "delay": 500,
+  "restartable": "rs",
+  "colours": true,
+  "legacyWatch": false
+}
+
+
+
+
+

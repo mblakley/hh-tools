@@ -1,0 +1,73 @@
+services:
+  hilton-heat-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: hilton-heat-dev
+    env_file:
+      - .env.docker
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+      # RDYSL Configuration (for compatibility)
+      - RDYSL_USERNAME=${RDYSL_USERNAME:-demo_username}
+      - RDYSL_PASSWORD=${RDYSL_PASSWORD:-demo_password}
+      # Hilton Heat Configuration
+      - SMTP_HOST=${SMTP_HOST:-smtp.gmail.com}
+      - SMTP_PORT=${SMTP_PORT:-587}
+      - SMTP_USER=${SMTP_USER:-}
+      - SMTP_PASS=${SMTP_PASS:-}
+      - DATABASE_PATH=/app/hilton_heat.db
+      # TeamSnap API Configuration (loaded from .env.docker via env_file)
+      # Do NOT override - let env_file values take precedence
+      # General Configuration
+      - PORT=3000
+      - SESSION_SECRET=${SESSION_SECRET:-development_session_secret_change_in_production}
+      - RATE_LIMIT_WINDOW_MS=900000
+      - RATE_LIMIT_MAX_REQUESTS=1000
+      - CACHE_DURATION_MINUTES=30
+      - ALLOWED_ORIGINS=${ALLOWED_ORIGINS:-*}
+    volumes:
+      # Mount source code for hot reloading
+      - .:/app
+      - /app/node_modules
+      # Mount logs directory for persistent logging
+      - ./logs:/app/logs
+      # Mount uploads directory for file processing
+      - ./uploads:/app/uploads
+      # Mount shared exports directory for file access
+      - shared_exports:/app/exports
+    restart: unless-stopped
+    command: npm run dev:docker
+
+  # Optional: RDYSL callup checker in development mode
+  rdysl-callup-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: rdysl-callup-dev
+    ports:
+      - "3001:3000"
+    environment:
+      - NODE_ENV=development
+      # RDYSL Configuration only
+      - RDYSL_USERNAME=${RDYSL_USERNAME:-demo_username}
+      - RDYSL_PASSWORD=${RDYSL_PASSWORD:-demo_password}
+      - PORT=3000
+      - SESSION_SECRET=${SESSION_SECRET:-development_session_secret_change_in_production}
+      - RATE_LIMIT_WINDOW_MS=900000
+      - RATE_LIMIT_MAX_REQUESTS=100
+      - CACHE_DURATION_MINUTES=30
+      - ALLOWED_ORIGINS=${ALLOWED_ORIGINS:-*}
+    volumes:
+      # Mount source code for hot reloading
+      - .:/app
+      - /app/node_modules
+      # Mount logs directory for persistent logging
+      - ./logs:/app/logs
+    restart: unless-stopped
+    command: node src/server.js
+
+volumes:
+  shared_exports:

@@ -1,0 +1,9 @@
+{
+  "enableAllProjectMcpServers": true,
+  "enabledMcpjsonServers": [
+    "agent-browser",
+    "playwright",
+    "context7",
+    "github"
+  ]
+}

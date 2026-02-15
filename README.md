@@ -1,249 +1,163 @@
-# RDYSL Callup API
+# Hilton Heat Tools
 
-A server-side API that securely accesses RDYSL (Rochester District Youth Soccer League) game fines data to analyze player callup compliance. This eliminates the need for manual copy/paste workflows while respecting CORS policies and website terms of service.
+A comprehensive Node.js/Express application for managing youth soccer operations, including RDYSL (Rochester District Youth Soccer League) data scraping, TeamSnap integration, and player registration management.
 
 ## Features
 
-- **Secure Authentication**: Server-side login with stored credentials
-- **Automated Data Scraping**: Uses Puppeteer to extract callup data
-- **Caching**: 30-minute cache to reduce server load and improve performance
-- **REST API**: Clean endpoints for frontend consumption
-- **Docker Support**: Containerized deployment with health checks
-- **Rate Limiting**: Built-in protection against abuse
-- **Input Validation**: Secure handling of user inputs
+### 🔍 RDYSL Callup Checker
+- Server-side authentication and scraping of RDYSL game fines data
+- Automated player callup compliance tracking
+- 30-minute caching to reduce server load
+- REST API for frontend consumption
+
+### ⚽ TeamSnap Integration
+- OAuth 2.0 authentication with TeamSnap API
+- Team roster synchronization
+- Member data management
+- Organization access across all your TeamSnap teams
+
+### 📊 Hilton Heat Registration System
+- Player registration management
+- Team assignment workflow
+- CSV import/export capabilities
+- Real-time statistics dashboard
+
+### 📅 RDYSL Season Scraper
+- Automated scraping of full season schedules
+- Game data extraction (teams, dates, times, locations)
+- CSV export with timestamps
+- Filter by team/division
 
 ## Quick Start
 
 ### Prerequisites
-
 - Docker and Docker Compose
 - RDYSL website credentials
+- TeamSnap account with organization access
 
 ### Setup
 
-1. **Clone and configure**:
+1. **Clone repository**:
    ```bash
    git clone <repository-url>
-   cd rdysl-callup-api
+   cd hh-tools
    ```
 
-2. **Set environment variables**:
+2. **Configure environment**:
    ```bash
-   cp env.example .env
-   # Edit .env with your RDYSL credentials
-   ```
-
-3. **Start the service**:
-   ```bash
-   docker-compose up -d
-   ```
-
-4. **Access the application**:
-   - Open http://localhost:3000 in your browser
-   - The API will automatically authenticate and cache initial data
-
-## Configuration
-
-### Environment Variables
-
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `RDYSL_USERNAME` | RDYSL login username | Required |
-| `RDYSL_PASSWORD` | RDYSL login password | Required |
-| `PORT` | Server port | 3000 |
-| `NODE_ENV` | Environment mode | production |
-| `SESSION_SECRET` | Session secret key | Random generated |
-| `RATE_LIMIT_WINDOW_MS` | Rate limit window (ms) | 900000 (15 min) |
-| `RATE_LIMIT_MAX_REQUESTS` | Max requests per window | 100 |
-| `CACHE_DURATION_MINUTES` | Cache duration (minutes) | 30 |
-| `ALLOWED_ORIGINS` | CORS allowed origins | * |
-
-### .env Example
-
-```env
-RDYSL_USERNAME=your_username
-RDYSL_PASSWORD=your_password
-PORT=3000
-NODE_ENV=production
-SESSION_SECRET=your_secure_session_secret
-RATE_LIMIT_WINDOW_MS=900000
-RATE_LIMIT_MAX_REQUESTS=100
-CACHE_DURATION_MINUTES=30
-ALLOWED_ORIGINS=http://localhost:3000,https://yourdomain.com
-```
-
-## API Endpoints
-
-### Health Check
-```
-GET /api/health
-```
-Returns server status and version information.
-
-### Get Callup Data
-```
-POST /api/callups
-Content-Type: application/json
-
-{
-  "playerSearch": "optional player name"
-}
-```
-Fetches fresh callup data from RDYSL (with caching).
-
-### Get Cached Data
-```
-GET /api/callups/cached
-```
-Returns cached callup data without triggering a new scrape.
-
-## Response Format
-
-```json
-{
-  "success": true,
-  "summary": [
-    {
-      "playerName": "John Doe",
-      "callupCount": 3,
-      "status": "WARNING",
-      "isWarning": true,
-      "isUnavailable": false,
-      "isOverLimit": false
-    }
-  ],
-  "stats": {
-    "totalPlayers": 50,
-    "warnings": 5,
-    "unavailable": 2,
-    "overLimit": 1,
-    "totalCallups": 125
-  },
-  "lastUpdated": "2023-12-01T10:30:00.000Z",
-  "totalRecords": 125
-}
-```
-
-## Status Codes
-
-- **OK**: 0-2 callups
-- **WARNING**: 3 callups (approaching limit)
-- **UNAVAILABLE**: 4 callups (at limit)
-- **OVER LIMIT**: 5+ callups (exceeds limit)
-
-## Development
-
-### Local Development
-
-1. **Install dependencies**:
-   ```bash
-   npm install
-   ```
-
-2. **Set environment variables**:
-   ```bash
-   cp env.example .env
+   cp .env.example .env
    # Edit .env with your credentials
    ```
 
-3. **Start development server**:
+3. **Start with Docker**:
    ```bash
-   npm run dev
+   # Development (with hot-reload)
+   docker-compose -f docker-compose.dev.yml up
+
+   # Production
+   docker-compose up -d
    ```
 
-### Testing
+4. **Access applications**:
+   - Hilton Heat Dashboard: http://localhost:3000/hilton-heat-v2.html
+   - RDYSL Callup Checker: http://localhost:3000/rdysl-callup-checker.html
+   - API Health: http://localhost:3000/api/health
 
-```bash
-npm test
+## Environment Variables
+
+Key configuration (see [.env.example](.env.example) for complete list):
+
+```env
+# RDYSL Credentials
+RDYSL_USERNAME=your_rdysl_username
+RDYSL_PASSWORD=your_rdysl_password
+
+# TeamSnap Credentials
+TEAMSNAP_CLIENT_ID=your_client_id
+TEAMSNAP_CLIENT_SECRET=your_client_secret
+TEAMSNAP_USERNAME=your_teamsnap_email@example.com
+TEAMSNAP_PASSWORD=your_teamsnap_password
+
+# Server Configuration
+PORT=3000
+NODE_ENV=production
+SESSION_SECRET=your_secure_random_secret
 ```
 
-## Deployment
+## Development
 
-### Docker Deployment
+### Local Development (without Docker)
 
 ```bash
-# Build and start
-docker-compose up -d
-
-# View logs
-docker-compose logs -f
-
-# Stop
-docker-compose down
+npm install              # Install dependencies
+npm run dev             # Start with auto-reload
+npm test                # Run tests
+npx playwright test     # Run E2E tests
 ```
 
-### Production Considerations
+### Scraping RDYSL Data
 
-1. **Security**:
-   - Use strong session secrets
-   - Configure proper CORS origins
-   - Consider using a reverse proxy (nginx)
-   - Enable HTTPS
+```bash
+npm run scrape-season           # Scrape current season
+npm run filter-hilton-heat      # Filter for Hilton Heat games
+```
 
-2. **Monitoring**:
-   - Monitor container health
-   - Set up log aggregation
-   - Monitor API response times
+### Docker Development
 
-3. **Scaling**:
-   - Consider load balancing for multiple instances
-   - Use external cache (Redis) for shared state
-   - Monitor memory usage (Puppeteer can be memory intensive)
+```bash
+docker-compose -f docker-compose.dev.yml up    # Start dev environment
+docker-compose logs -f                          # View logs
+```
+
+## Documentation
+
+- **[TeamSnap Setup](docs/TEAMSNAP.md)** - TeamSnap integration guide
+- **[Development Guide](docs/DEVELOPMENT.md)** - Docker, testing, workflows
+- **[Web Interface](docs/WEB_INTERFACE.md)** - Dashboard usage
+- **[RDYSL Scraper](docs/RDYSL_SCRAPER.md)** - Season data scraping
+- **[Player Assignments](docs/PLAYER_ASSIGNMENTS.md)** - Assignment workflow
+
+## Project Structure
+
+```
+/
+├── src/                   # Source code
+│   ├── server.js          # Main Express server
+│   ├── database.js        # SQLite operations
+│   ├── rdysl-season-scraper.js
+│   ├── teamsnap-api.js
+│   └── ...
+├── public/                # Static web files
+├── tests/e2e/             # E2E tests
+├── docs/                  # Documentation
+└── scripts/               # Utility scripts
+```
+
+## Tech Stack
+
+- Node.js v22 + Express.js
+- SQLite3 database
+- Puppeteer (web scraping) + Cheerio (HTML parsing)
+- Playwright (E2E testing)
+- Docker + Docker Compose
 
 ## Troubleshooting
 
-### Common Issues
+**RDYSL Authentication Issues:**
+- Verify credentials in `.env`
+- Check if website structure changed
+- Review server logs
 
-1. **Authentication Failures**:
-   - Verify credentials in `.env`
-   - Check if RDYSL website structure has changed
-   - Review logs for specific error messages
+**TeamSnap API Errors:**
+- Verify OAuth credentials
+- Ensure account has organization access
+- Check team/form IDs are correct
 
-2. **No Data Returned**:
-   - Ensure you're logged into RDYSL with appropriate permissions
-   - Check if the game fines page structure has changed
-   - Verify network connectivity
-
-3. **High Memory Usage**:
-   - Puppeteer uses significant memory
-   - Consider reducing cache duration
-   - Monitor container resource limits
-
-### Logs
-
-```bash
-# View application logs
-docker-compose logs -f rdysl-callup-api
-
-# View specific time range
-docker-compose logs --since="2023-12-01T10:00:00" rdysl-callup-api
-```
-
-## Security
-
-- Credentials are stored as environment variables
-- No sensitive data is logged
-- Rate limiting prevents abuse
-- Input validation prevents injection attacks
-- Non-root user in Docker container
-- Helmet.js provides security headers
+**Docker Issues:**
+- Ensure port 3000 not in use
+- Verify environment variables are set
+- Check logs: `docker-compose logs -f`
 
 ## License
 
-MIT License - see LICENSE file for details.
-
-## Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Add tests if applicable
-5. Submit a pull request
-
-## Support
-
-For issues and questions:
-1. Check the troubleshooting section
-2. Review application logs
-3. Create an issue with detailed information
-
+MIT License
