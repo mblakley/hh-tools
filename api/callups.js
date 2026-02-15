@@ -85,7 +85,8 @@ module.exports = async (req, res) => {
     res.status(500).json({
       success: false,
       error: 'Internal server error',
-      message: error.message
+      message: error.message,
+      stack: process.env.NODE_ENV !== 'production' ? error.stack : undefined
     });
   }
 };
