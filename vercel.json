@@ -1,6 +1,9 @@
 {
   "version": 2,
   "public": true,
+  "framework": null,
+  "buildCommand": null,
+  "outputDirectory": "public",
   "functions": {
     "api/callups.js": {
       "maxDuration": 60,
@@ -10,7 +13,7 @@
   "rewrites": [
     {
       "source": "/",
-      "destination": "/public/index.html"
+      "destination": "/index.html"
     }
   ],
   "headers": [
