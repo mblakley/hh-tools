@@ -1,4 +1,4 @@
-const RDYSLScraperServerless = require('../src/scraper-serverless');
+const RDYSLScraperServerless = require('./scraper-serverless');
 
 // Cache configuration
 let cachedData = null;
