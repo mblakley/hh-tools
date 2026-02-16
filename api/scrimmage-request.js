@@ -99,6 +99,10 @@ const TEAM_CONTACTS = {
     { name: 'Jackie Niedzwiecki', email: 'keller3583@gmail.com', team: 'GU16 - Niedzwiecki' },
     { name: 'Justin Niedzwiecki', email: 'jniedzwiecki8@gmail.com', team: 'GU16 - Niedzwiecki' },
   ],
+  // Test entry - sends to webmaster only
+  BU99: [
+    { name: 'Test Webmaster', email: 'webmaster@hiltonheat.com', team: 'BU99 - Test' },
+  ],
 };
 
 const FROM_ADDRESS = '"Hilton Heat Scheduling" <webmaster@hiltonheat.com>';
