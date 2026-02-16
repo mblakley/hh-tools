@@ -1022,6 +1022,132 @@ class TeamSnapAPI {
          }
 
          /**
+          * Get all members in a division (single API call)
+          */
+         async getDivisionMembers(divisionId) {
+           try {
+             const token = await this.getAccessToken();
+             const endpoint =
+               `${this.baseURL}/members/search?division_id=${divisionId}`;
+
+             const response = await axios.get(endpoint, {
+               headers: {
+                 'Authorization': `Bearer ${token}`,
+                 'Accept': 'application/vnd.collection+json'
+               },
+               timeout: 30000,
+               validateStatus: s => s < 500
+             });
+
+             if (response.status >= 400) {
+               throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+             }
+
+             const members = (response.data?.collection?.items || []).map(item => {
+               const data = {};
+               item.data.forEach(f => { data[f.name] = f.value; });
+               return {
+                 id: data.id,
+                 first_name: data.first_name || '',
+                 last_name: data.last_name || '',
+                 email: data.email_address || '',
+                 phone: data.phone_number || '',
+                 position: data.position || '',
+                 is_non_player: data.is_non_player || false,
+                 is_manager: data.is_manager || false,
+                 is_owner: data.is_owner || false,
+                 team_id: data.team_id
+               };
+             });
+
+             return { success: true, members, count: members.length };
+           } catch (error) {
+             console.error('Error fetching division members:', error.message);
+             return { success: false, members: [], count: 0 };
+           }
+         }
+
+         /**
+          * Get email addresses for one or more teams.
+          * Accepts a single team ID or comma-separated IDs.
+          */
+         async getTeamMemberEmails(teamId) {
+           try {
+             const token = await this.getAccessToken();
+             const endpoint =
+               `${this.baseURL}/member_email_addresses/search?team_id=${teamId}`;
+
+             const response = await axios.get(endpoint, {
+               headers: {
+                 'Authorization': `Bearer ${token}`,
+                 'Accept': 'application/vnd.collection+json'
+               },
+               timeout: 30000,
+               validateStatus: s => s < 500
+             });
+
+             if (response.status >= 400) {
+               throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+             }
+
+             const emailMap = {}; // member_id -> email
+             if (response.data?.collection?.items) {
+               for (const item of response.data.collection.items) {
+                 const data = {};
+                 item.data.forEach(f => { data[f.name] = f.value; });
+                 if (data.member_id && data.email) {
+                   emailMap[data.member_id] = data.email;
+                 }
+               }
+             }
+             return { success: true, emailMap };
+           } catch (error) {
+             console.error('Error fetching member emails:', error.message);
+             return { success: false, emailMap: {} };
+           }
+         }
+
+         /**
+          * Get phone numbers for one or more teams.
+          * Accepts a single team ID or comma-separated IDs.
+          */
+         async getTeamMemberPhones(teamId) {
+           try {
+             const token = await this.getAccessToken();
+             const endpoint =
+               `${this.baseURL}/member_phone_numbers/search?team_id=${teamId}`;
+
+             const response = await axios.get(endpoint, {
+               headers: {
+                 'Authorization': `Bearer ${token}`,
+                 'Accept': 'application/vnd.collection+json'
+               },
+               timeout: 30000,
+               validateStatus: s => s < 500
+             });
+
+             if (response.status >= 400) {
+               throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+             }
+
+             const phoneMap = {}; // member_id -> phone
+             if (response.data?.collection?.items) {
+               for (const item of response.data.collection.items) {
+                 const data = {};
+                 item.data.forEach(f => { data[f.name] = f.value; });
+                 if (data.member_id && data.phone_number) {
+                   phoneMap[data.member_id] = data.phone_number;
+                 }
+               }
+             }
+             return { success: true, phoneMap };
+           } catch (error) {
+             console.error('Error fetching member phones:', error.message);
+             return { success: false, phoneMap: {} };
+           }
+         }
+
+         /**
           * Get all organizations the authenticated user has access to
           */
          async getOrganizations() {

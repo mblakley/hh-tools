@@ -77,6 +77,74 @@ The API can access:
 - ✅ Basic team information
 - ❌ Registration form data (requires session auth)
 
+## Export Team Contacts Script
+
+Export names, emails, and phone numbers for coaches, managers, and owners
+from Hilton Heat TeamSnap divisions. Produces two CSV files:
+
+### Usage
+
+```bash
+node scripts/export-team-emails.js
+```
+
+### Output Files (saved to `data/exports/`)
+
+| File | Description |
+|------|-------------|
+| `teamsnap-byga-<timestamp>.csv` | Byga upload format (deduplicated by email) |
+| `teamsnap-roster-<timestamp>.csv` | Full roster with team names |
+
+### Byga CSV Format
+
+```
+first_name,last_name,email,phone,roles
+```
+
+- `roles` — semicolon-separated: `head coach`, `assistant coach`, `manager`, `owner`
+- `phone` — normalized to `585-555-1234` format
+- Duplicate emails across teams are merged (roles combined)
+
+### Roster CSV Format
+
+```
+team,first_name,last_name,email,phone,role
+```
+
+- One row per person per team (not deduplicated)
+- Useful for seeing which team each person belongs to
+
+### What It Fetches
+
+The script pulls from two Hilton Heat divisions (IDs `974120` and `974119`)
+and includes only members who are:
+
+- Team owners (`is_owner` flag)
+- Team managers (`is_manager` flag)
+- Members with position: Head Coach, Assistant Coach, Coach, or Manager
+
+### API Efficiency
+
+Uses bulk TeamSnap API queries to minimize requests:
+
+- **Division-level member search** — 1 call per division instead of per-team
+- **Comma-separated team_id** — batch email/phone lookups in 2 calls total
+- Total: ~6 API calls regardless of team count
+
+### Role Normalization
+
+| Raw TeamSnap Value | Normalized |
+|---------------------|-----------|
+| Head Coach | head coach |
+| Coach | head coach |
+| Asst Coach | assistant coach |
+| Asst. Coach | assistant coach |
+| Assistant Coach | assistant coach |
+| Manager | manager |
+| Team Manager | manager |
+| Owner | owner |
+| Asst Coach/Manager | assistant coach;manager |
+
 ## Troubleshooting
 
 ### "Invalid username or password"
