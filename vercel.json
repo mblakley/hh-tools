@@ -8,6 +8,10 @@
     "api/callups.js": {
       "maxDuration": 60,
       "memory": 1024
+    },
+    "api/scrimmage-request.js": {
+      "maxDuration": 30,
+      "memory": 256
     }
   },
   "rewrites": [
