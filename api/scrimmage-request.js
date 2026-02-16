@@ -255,6 +255,13 @@ module.exports = async (req, res) => {
     res.status(500).json({
       success: false,
       error: 'Failed to process scrimmage request',
+      debug: {
+        message: error.message,
+        code: error.code,
+        hasSMTPUser: !!process.env.SMTP_USER,
+        hasSMTPPass: !!process.env.SMTP_PASS,
+        smtpHost: process.env.SMTP_HOST || '(default)',
+      },
     });
   }
 };
