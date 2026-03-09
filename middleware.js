@@ -1,5 +1,3 @@
-import { next } from '@vercel/functions';
-
 export const config = {
   matcher: [
     '/',
@@ -15,7 +13,7 @@ export default function middleware(request) {
   const cookies = parseCookies(request.headers.get('cookie') || '');
 
   if (cookies['hh_access']) {
-    return next();
+    return;
   }
 
   const url = new URL(request.url);
