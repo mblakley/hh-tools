@@ -6,9 +6,6 @@
   "scripts": {
     "start": "node src/server.js"
   },
-  "overrides": {
-    "encoding-sniffer": "^1.0.2"
-  },
   "dependencies": {
     "@sparticuz/chromium": "148.0.0",
     "cheerio": "^1.2.0",
