@@ -32,7 +32,7 @@ module.exports = async (req, res) => {
 
   // Step 4: Try loading the scraper module
   try {
-    require('../src/scraper-serverless');
+    require('./scraper-serverless');
     results.steps.push({ step: 'require scraper-serverless', status: 'ok' });
   } catch (e) {
     results.steps.push({ step: 'require scraper-serverless', status: 'fail', error: e.message });

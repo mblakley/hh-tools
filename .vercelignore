@@ -6,42 +6,26 @@ node_modules/
 .env.*
 !.env.example
 
-# Database files
-*.db
-*.db-journal
+# Local data and artifacts
 data/
-
-# Docker files
-Dockerfile
-Dockerfile.dev
-docker-compose.yml
-docker-compose.dev.yml
-.dockerignore
-
-# Build artifacts
 exports/
 uploads/
+screenshots/
+*.log
+*.xlsx
+*.traineddata
 
-# Testing
-tests/
-playwright.config.js
-.playwright/
+# Local scripts (not part of the deployed app)
+scripts/
 
-# Documentation (optional - remove these lines if you want docs deployed)
-docs/
+# Docs
 *.md
 !README.md
-
-# Source code (not needed for static callup checker)
-src/
-server.js
-nodemon.json
 
 # IDE and system files
 .vscode/
 .idea/
 .DS_Store
-*.log
 
 # Claude files
 .claude/
@@ -51,9 +35,3 @@ nodemon.json
 # Git
 .git/
 .gitignore
-
-# Excel and data files (optional - keep if needed)
-*.xlsx
-
-# Scripts
-scripts/

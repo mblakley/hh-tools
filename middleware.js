@@ -3,9 +3,6 @@ export const config = {
     '/',
     '/index.html',
     '/rdysl-callup-checker.html',
-    '/hilton-heat.html',
-    '/hilton-heat-v2.html',
-    '/calendar.html',
   ],
 };
 

@@ -1,163 +1,58 @@
-# Hilton Heat Tools
+# Hilton Heat Tools — RDYSL Callup Checker
 
-A comprehensive Node.js/Express application for managing youth soccer operations, including RDYSL (Rochester District Youth Soccer League) data scraping, TeamSnap integration, and player registration management.
+A static site plus Vercel serverless functions that tracks RDYSL (Rochester District
+Youth Soccer League) player callup compliance. Deployed at https://hhtools.vercel.app
+via the GitHub integration: every push to `master` auto-deploys the Vercel project
+`hh_tools`.
 
-## Features
+## Architecture
 
-### 🔍 RDYSL Callup Checker
-- Server-side authentication and scraping of RDYSL game fines data
-- Automated player callup compliance tracking
-- 30-minute caching to reduce server load
-- REST API for frontend consumption
+- **`public/`** — static frontend. `index.html` + `js/app.js` is the callup dashboard;
+  `rdysl-callup-checker.html` is the standalone checker page. Both sit behind a cookie
+  login gate (`middleware.js` + `api/auth.js`, redirects to `login.html`).
+- **`api/`** — CommonJS serverless functions:
+  | Endpoint | Purpose |
+  |---|---|
+  | `GET/POST /api/callups` | Scrape RDYSL game-fines data (POST or `?forceRefresh=true` bypasses the cache) |
+  | `GET /api/health` | Liveness check |
+  | `POST /api/auth` | Login gate |
+  | `GET /api/debug` | Step-by-step scraper diagnostics |
+  | `POST /api/scrimmage-request` | Emails scrimmage requests via SMTP (nodemailer) |
+- The scraper (`api/scraper-serverless.js`) uses **puppeteer-core + @sparticuz/chromium**
+  on Vercel and full **puppeteer** locally (branch on `process.env.VERCEL`). Results are
+  cached in-memory for `CACHE_DURATION_MINUTES` (default 30).
 
-### ⚽ TeamSnap Integration
-- OAuth 2.0 authentication with TeamSnap API
-- Team roster synchronization
-- Member data management
-- Organization access across all your TeamSnap teams
+## Environment variables (set in Vercel project settings)
 
-### 📊 Hilton Heat Registration System
-- Player registration management
-- Team assignment workflow
-- CSV import/export capabilities
-- Real-time statistics dashboard
+`RDYSL_USERNAME`, `RDYSL_PASSWORD`, `CACHE_DURATION_MINUTES`,
+`SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`
 
-### 📅 RDYSL Season Scraper
-- Automated scraping of full season schedules
-- Game data extraction (teams, dates, times, locations)
-- CSV export with timestamps
-- Filter by team/division
+## Local testing
 
-## Quick Start
-
-### Prerequisites
-- Docker and Docker Compose
-- RDYSL website credentials
-- TeamSnap account with organization access
-
-### Setup
-
-1. **Clone repository**:
-   ```bash
-   git clone <repository-url>
-   cd hh-tools
-   ```
-
-2. **Configure environment**:
-   ```bash
-   cp .env.example .env
-   # Edit .env with your credentials
-   ```
-
-3. **Start with Docker**:
-   ```bash
-   # Development (with hot-reload)
-   docker-compose -f docker-compose.dev.yml up
-
-   # Production
-   docker-compose up -d
-   ```
-
-4. **Access applications**:
-   - Hilton Heat Dashboard: http://localhost:3000/hilton-heat-v2.html
-   - RDYSL Callup Checker: http://localhost:3000/rdysl-callup-checker.html
-   - API Health: http://localhost:3000/api/health
-
-## Environment Variables
-
-Key configuration (see [.env.example](.env.example) for complete list):
-
-```env
-# RDYSL Credentials
-RDYSL_USERNAME=your_rdysl_username
-RDYSL_PASSWORD=your_rdysl_password
-
-# TeamSnap Credentials
-TEAMSNAP_CLIENT_ID=your_client_id
-TEAMSNAP_CLIENT_SECRET=your_client_secret
-TEAMSNAP_USERNAME=your_teamsnap_email@example.com
-TEAMSNAP_PASSWORD=your_teamsnap_password
-
-# Server Configuration
-PORT=3000
-NODE_ENV=production
-SESSION_SECRET=your_secure_random_secret
-```
-
-## Development
-
-### Local Development (without Docker)
+There is no local server. To exercise the scraper locally (needs a `.env` with RDYSL
+credentials):
 
 ```bash
-npm install              # Install dependencies
-npm run dev             # Start with auto-reload
-npm test                # Run tests
-npx playwright test     # Run E2E tests
+node -e "
+const fs = require('fs');
+for (const line of fs.readFileSync('.env','utf8').split(/\r?\n/)) {
+  const m = line.match(/^\s*([A-Za-z_][A-Za-z0-9_]*)\s*=\s*(.*)\s*$/);
+  if (m) process.env[m[1]] = m[2];
+}
+const S = require('./api/scraper-serverless.js');
+new S().scrapeCallupData().then(d => console.log(d.success, (d.summary||[]).length, 'records'));
+"
 ```
 
-### Scraping RDYSL Data
+## Dependency constraints
 
-```bash
-npm run scrape-season           # Scrape current season
-npm run filter-hilton-heat      # Filter for Hilton Heat games
-```
-
-### Docker Development
-
-```bash
-docker-compose -f docker-compose.dev.yml up    # Start dev environment
-docker-compose logs -f                          # View logs
-```
-
-## Documentation
-
-- **[TeamSnap Setup](docs/TEAMSNAP.md)** - TeamSnap integration guide
-- **[Development Guide](docs/DEVELOPMENT.md)** - Docker, testing, workflows
-- **[Web Interface](docs/WEB_INTERFACE.md)** - Dashboard usage
-- **[RDYSL Scraper](docs/RDYSL_SCRAPER.md)** - Season data scraping
-- **[Player Assignments](docs/PLAYER_ASSIGNMENTS.md)** - Assignment workflow
-
-## Project Structure
-
-```
-/
-├── src/                   # Source code
-│   ├── server.js          # Main Express server
-│   ├── database.js        # SQLite operations
-│   ├── rdysl-season-scraper.js
-│   ├── teamsnap-api.js
-│   └── ...
-├── public/                # Static web files
-├── tests/e2e/             # E2E tests
-├── docs/                  # Documentation
-└── scripts/               # Utility scripts
-```
-
-## Tech Stack
-
-- Node.js v22 + Express.js
-- SQLite3 database
-- Puppeteer (web scraping) + Cheerio (HTML parsing)
-- Playwright (E2E testing)
-- Docker + Docker Compose
-
-## Troubleshooting
-
-**RDYSL Authentication Issues:**
-- Verify credentials in `.env`
-- Check if website structure changed
-- Review server logs
-
-**TeamSnap API Errors:**
-- Verify OAuth credentials
-- Ensure account has organization access
-- Check team/form IDs are correct
-
-**Docker Issues:**
-- Ensure port 3000 not in use
-- Verify environment variables are set
-- Check logs: `docker-compose logs -f`
-
-## License
-
-MIT License
+- **Node 24** (`engines` field; matches the Vercel runtime).
+- **Vercel's function loader cannot `require()` ESM-only packages** — it throws
+  `ERR_REQUIRE_ESM` at invocation even though plain Node ≥22.12 allows it, so local
+  tests pass and production crashes. This is why puppeteer is pinned to the 24.x line
+  (`type: commonjs`) rather than the ESM-only 25.x. Before adding or upgrading any
+  dependency, confirm nothing in the tree is `"type": "module"` without a `require`
+  export condition.
+- `@sparticuz/chromium`'s major version must match the Chrome version of the pinned
+  puppeteer release (see https://pptr.dev/supported-browsers), so the two are updated
+  together as an exact-pinned pair.
